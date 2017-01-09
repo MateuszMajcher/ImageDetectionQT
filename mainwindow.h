@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QErrorMessage>
+#include <QMap>
 
 class QAction;
 class QListWidget;
@@ -35,8 +37,10 @@ private:
     void createStatusBar();
     void createDockWindows();
 
+    QErrorMessage msg;
+
     QListWidget *listImages;
-    QPair<QString, int> countClass;
+    QMap<QString, int> count_file;
 
     //panel
     QWidget *settingsPanel;

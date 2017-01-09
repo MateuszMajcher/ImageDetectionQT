@@ -38,17 +38,46 @@ void MainWindow::newMatch() {
 }
 
 void MainWindow::loadCountFile() {
-    QString countFileName = QFileDialog::getOpenFileName(this, tr("Open count file"), "/home", "Text files (*.txt)");
+    QString countFileName = QFileDialog::getOpenFileName(this, tr("Open count file"), "/home/mateusz/", "Text files (*.txt)");
 
     QFile inputFile(countFileName);
     if (inputFile.open(QIODevice::ReadOnly)) {
         QTextStream in(&inputFile);
+        bool success = true;
         while (!in.atEnd()) {
-             qDebug() <<in.readLine();
+
+             QStringList tokens = in.readLine().split(":", QString::SkipEmptyParts);
+
+             if (tokens.size() == 2) {
+                  bool is_number = false;
+                  int v = tokens.at(1).toInt(&is_number);;
+                  if (is_number) {
+                    count_file.insert(tokens.at(0), v);
+                  } else {
+                      success = false;
+                  }
+             } else {
+                 success = false;
+             }
 
         }
-        countFile_edit->setText(countFileName);
         inputFile.close();
+
+        if (success) {
+        countFile_edit->setText(countFileName);
+
+        } else {
+            count_file.clear();
+            msg.showMessage("plik " + countFileName + " jest niepoprawny");
+        }
+
+
+        QMapIterator<QString, int> it(count_file);
+        while (it.hasNext()) {
+            it.next();
+            qDebug() << it.key() << ": " << it.value() << endl;
+        }
+
     }
 
 
