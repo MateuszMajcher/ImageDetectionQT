@@ -23,9 +23,11 @@ INCLUDEPATH += /home/mateusz/example/lib/ann_1.1/include/ANN \
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    vocabmatch.cpp
+    vocabmatch.cpp \
+    imageworker.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    imageworker.h
 
 FORMS    += mainwindow.ui
 

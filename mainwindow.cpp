@@ -6,8 +6,10 @@
 
 MainWindow::MainWindow() {
 
-    listImages = new QListWidget(this);
-    setCentralWidget(listImages);
+    worker = new ImageWorker(this);
+
+   // listImages = new QListWidget(this);
+    setCentralWidget(worker->getImage());
 
     createActions();
     createStatusBar();
@@ -22,82 +24,81 @@ MainWindow::MainWindow() {
 }
 
 void MainWindow::newMatch() {
-
+    clear();
     QStringList fileName = QFileDialog::getOpenFileNames(this,tr("Open Image"), "C:/qt-win-opensource-src-4.5.0/bin/", tr("Image Files(*.png *.jpg *.bmp *.avi *.gif)"));
 
-    listImages->setViewMode(QListWidget::IconMode);
-    listImages->setIconSize(QSize(200, 200));
-    listImages->setResizeMode(QListWidget::Adjust);
+    worker->getImage()->setViewMode(QListWidget::IconMode);
+    worker->getImage()->setIconSize(QSize(200, 200));
+    worker->getImage()->setResizeMode(QListWidget::Adjust);
 
     QStringListIterator it(fileName);
     while (it.hasNext()) {
-        //qDebug() << "Widget" << it.next();
-        listImages->addItem(new QListWidgetItem(QIcon(it.next()), "czxc"));
+        worker->add(it.next());
     }
 
 }
 
-void MainWindow::loadCountFile() {
-    QString countFileName = QFileDialog::getOpenFileName(this, tr("Open count file"), "/home/mateusz/", "Text files (*.txt)");
-
+void MainWindow::loadCountFile()
+{
+    QString countFileName = QFileDialog::getOpenFileName(this, tr("Open count file"), "/home/mateusz/Dokumenty/c++/test", "Text files (*.txt)");
+    count_file.clear();
     QFile inputFile(countFileName);
     if (inputFile.open(QIODevice::ReadOnly)) {
         QTextStream in(&inputFile);
         bool success = true;
         while (!in.atEnd()) {
 
-             QStringList tokens = in.readLine().split(":", QString::SkipEmptyParts);
+            QStringList tokens = in.readLine().split(":", QString::SkipEmptyParts);
 
-             if (tokens.size() == 2) {
-                  bool is_number = false;
-                  int v = tokens.at(1).toInt(&is_number);;
-                  if (is_number) {
+            if (tokens.size() == 2) {
+                bool is_number = false;
+                int v = tokens.at(1).toInt(&is_number);
+                ;
+                if (is_number) {
                     count_file.insert(tokens.at(0), v);
-                  } else {
-                      success = false;
-                  }
-             } else {
-                 success = false;
-             }
-
+                }
+                else {
+                    success = false;
+                }
+            }
+            else {
+                success = false;
+            }
         }
         inputFile.close();
 
         if (success) {
-        countFile_edit->setText(countFileName);
 
-        } else {
+            countFile_edit->setText(countFileName);
+            //ustawienie ilosci wierszy w tabeli
+            countTable->setRowCount(count_file.size());
+
+            QMapIterator<QString, int> i(count_file);
+            int row = 0;
+            while (i.hasNext()) {
+                i.next();
+                countTable->setItem(row, 0, new QTableWidgetItem(i.key()));
+                countTable->setItem(row, 1, new QTableWidgetItem(QString::number(i.value())));
+                row++;
+            }
+        }
+        else {
             count_file.clear();
             msg.showMessage("plik " + countFileName + " jest niepoprawny");
         }
-
-
-        QMapIterator<QString, int> it(count_file);
-        while (it.hasNext()) {
-            it.next();
-            qDebug() << it.key() << ": " << it.value() << endl;
-        }
-
     }
-
-
 }
 
 
 
 void MainWindow::clear() {
-
+    worker->getImage()->clear();
 }
 
-void MainWindow::runMatch() {}
-
-void MainWindow::print() {}
-
-void MainWindow::save() {}
-
-void MainWindow::undo()
-{
-
+void MainWindow::runMatch() {
+    showProgressBar();
+    qApp->processEvents();
+    worker->run();
 }
 
 void MainWindow::insertCustomer(const QString &customer)
@@ -108,6 +109,10 @@ void MainWindow::insertCustomer(const QString &customer)
 void MainWindow::addParagraph(const QString &paragraph)
 {
 
+}
+
+void MainWindow::showProgressBar() {
+      dockProgressBar->show();
 }
 
 void MainWindow::about()
@@ -138,6 +143,13 @@ void MainWindow::createActions() {
     fileMenu->addAction(clearAct);
     fileToolBar->addAction(clearAct);
 
+
+    QAction *runAct = new QAction(QIcon(":/images/run.png"), tr("&Run"), this);
+    runAct->setStatusTip(tr("Run match"));
+    connect(runAct, &QAction::triggered, this, &MainWindow::runMatch);
+    fileMenu->addAction(runAct);
+    fileToolBar->addAction(runAct);
+
     viewMenu = menuBar()->addMenu(tr("View"));
     menuBar()->addSeparator();
 
@@ -151,6 +163,8 @@ void MainWindow::createStatusBar() {
 }
 
 void MainWindow::createDockWindows() {
+
+    //Panel sterowania
     QDockWidget *dock = new QDockWidget(tr("Settings panel"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     QPalette pal = palette();
@@ -174,15 +188,27 @@ void MainWindow::createDockWindows() {
 
 
 
-
+    // Panel z tabela
     dock = new QDockWidget(tr("Count file"), this);
-    countTable = new QTableWidget(12,3,this);
+    countTable = new QTableWidget(1,2,this);
+    QTableWidgetItem *classHeader = new QTableWidgetItem(tr("Klasa"));
+    QTableWidgetItem *countHeader = new QTableWidgetItem(tr("ilosc"));
+    countTable->setHorizontalHeaderItem(0, classHeader);
+    countTable->setHorizontalHeaderItem(1, countHeader);
+    countTable->horizontalHeader()->setStretchLastSection(true);
 
-      dock->setWidget(countTable);
-      addDockWidget(Qt::RightDockWidgetArea, dock);
-      viewMenu->addAction(dock->toggleViewAction());
+    dock->setWidget(countTable);
+    addDockWidget(Qt::RightDockWidgetArea, dock);
+    viewMenu->addAction(dock->toggleViewAction());
 
-     // connect(customerList, &QListWidget::currentTextChanged, this, &MainWindow::insertCustomer);
-     //connect(countTable, &QListWidget::currentTextChanged, this, &MainWindow::addParagraph);
+
+    //Panel postepu
+    dockProgressBar = new QDockWidget(tr("Progress"), this);
+
+    progressBar = new QProgressBar();
+    dockProgressBar->setWidget(progressBar);
+    dockProgressBar->hide();
+    addDockWidget(Qt::BottomDockWidgetArea, dockProgressBar);
+    viewMenu->addAction(dockProgressBar->toggleViewAction());
 }
 

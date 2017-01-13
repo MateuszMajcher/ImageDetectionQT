@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QErrorMessage>
 #include <QMap>
+#include "imageworker.h"
 
 class QAction;
 class QListWidget;
@@ -13,6 +14,7 @@ class QLineEdit;
 class QMenu;
 class QTextEdit;
 class QColor;
+class QProgressBar;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -25,21 +27,22 @@ private slots:
     void loadCountFile(); //Wczytanie pliku count
     void clear();
     void runMatch();
-    void save();
-    void print();
-    void undo();
     void about();
     void insertCustomer(const QString& customer);
     void addParagraph(const QString &paragraph);
+
+
 
 private:
     void createActions();
     void createStatusBar();
     void createDockWindows();
+    void showProgressBar();
 
     QErrorMessage msg;
 
-    QListWidget *listImages;
+    ImageWorker* worker;
+
     QMap<QString, int> count_file;
 
     //panel
@@ -50,6 +53,9 @@ private:
     QPushButton *loadCountFile_btn;
     QLineEdit *countFile_edit;
 
+    //Progress bar panel
+    QDockWidget *dockProgressBar;
+    QProgressBar *progressBar;
 
 
     QMenu *viewMenu;

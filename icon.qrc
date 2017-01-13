@@ -2,5 +2,6 @@
 <qresource>
     <file>images/new.png</file>
     <file>images/close.png</file>
+    <file>images/run.png</file>
 </qresource>
 </RCC>
