@@ -15,6 +15,7 @@ class QMenu;
 class QTextEdit;
 class QColor;
 class QProgressBar;
+class QLabel;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -25,12 +26,14 @@ public:
 private slots:
     void newMatch(); //Wczytanie nowych obrazów
     void loadCountFile(); //Wczytanie pliku count
-    void clear();
-    void runMatch();
-    void about();
+    void loadDatabaseFile(); //wczytanie bazy danych
+    void loadImageListFile(); // wczytanie listy obrazow uzytych do uczenia
+    void clear(); //Wyczyszczenie obrazow
+    void runMatch(); //rozpoznawanie
+    void about(); //o aplikacji
     void insertCustomer(const QString& customer);
     void addParagraph(const QString &paragraph);
-
+    void setGSC(const QString &);
 
 
 private:
@@ -44,6 +47,9 @@ private:
     ImageWorker* worker;
 
     QMap<QString, int> count_file;
+    QString database_file;
+    QString image_list_file;
+    int gsc;
 
     //panel
     QWidget *settingsPanel;
@@ -52,12 +58,18 @@ private:
     //Settings panel
     QPushButton *loadCountFile_btn;
     QLineEdit *countFile_edit;
+    QPushButton *loadDatabaseFile_btn;
+    QLineEdit *database_edit;
+    QPushButton *loadImageListFile_btn;
+    QLineEdit *imageList_edit;
+    QLabel *gsc_label;
+    QLineEdit *gsc_edit;
 
     //Progress bar panel
     QDockWidget *dockProgressBar;
     QProgressBar *progressBar;
 
-
+    //menu
     QMenu *viewMenu;
 };
 

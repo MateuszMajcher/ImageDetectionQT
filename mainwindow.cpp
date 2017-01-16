@@ -90,6 +90,31 @@ void MainWindow::loadCountFile()
 }
 
 
+void MainWindow::loadDatabaseFile() {
+    QString path;
+    if (database_file.isEmpty())
+        path ="./";
+    else
+        path = database_file;
+
+    database_file = QFileDialog::getOpenFileName(this, tr("Open database file"), path, "Database files (*.db)");
+    database_edit->setText(database_file);
+}
+
+void MainWindow::loadImageListFile() {
+    QString path;
+    if (image_list_file.isEmpty())
+        path = "./";
+    else
+        path = image_list_file;
+
+    image_list_file = QFileDialog::getOpenFileName(this, tr("Open file with list image using to learn"), path, "Text file (*.txt)");
+    imageList_edit->setText(image_list_file);
+}
+
+void MainWindow::setGSC(const QString &number) {
+    gsc = number.toInt();
+}
 
 void MainWindow::clear() {
     worker->getImage()->clear();
@@ -129,7 +154,7 @@ void MainWindow::createActions() {
     QToolBar *fileToolBar = addToolBar(tr("File"));
 
     const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/images/new.png"));
-    QAction *newLetterAct = new QAction(newIcon, tr("&New Letter"), this);
+    QAction *newLetterAct = new QAction(newIcon, tr("&New match"), this);
     newLetterAct->setShortcuts(QKeySequence::New);
     newLetterAct->setStatusTip(tr("Create a new form letter"));
     connect(newLetterAct, &QAction::triggered, this, &MainWindow::newMatch);
@@ -154,7 +179,8 @@ void MainWindow::createActions() {
     menuBar()->addSeparator();
 
     QMenu *helpMenu = menuBar()->addMenu(tr("Pomoc"));
-    QAction *aboutAct = helpMenu->addAction(tr("O aplikacji"), this, &QApplication::aboutQt);
+    helpMenu->addAction(tr("O Aplikacji"), this, &MainWindow::about);
+    helpMenu->addAction(tr("Wersja Qt"), this, &QApplication::aboutQt);
 
 }
 
@@ -174,18 +200,35 @@ void MainWindow::createDockWindows() {
     settingsPanel->setPalette(pal);
 
     QFormLayout *layout = new QFormLayout;
+    //ladowanie count file
     loadCountFile_btn = new QPushButton("Load count file");
     countFile_edit = new QLineEdit;
     layout->addRow(loadCountFile_btn, countFile_edit);
-    settingsPanel->setLayout(layout);
+    //ladowanie bazy danych
+    loadDatabaseFile_btn = new QPushButton("Load database");
+    database_edit = new QLineEdit;
+    layout->addRow(loadDatabaseFile_btn, database_edit);
+    //ladowanie plika z lista obrazow
+    loadImageListFile_btn = new QPushButton("load learn image");
+    imageList_edit = new QLineEdit;
+    layout->addRow(loadImageListFile_btn, imageList_edit);
+    //gsc
+    gsc_label = new QLabel("best matches");
+    gsc_edit = new QLineEdit;
+    gsc_edit->setValidator(new QIntValidator(0, 1000, this));
+    layout->addRow(gsc_label, gsc_edit);
 
+
+    settingsPanel->setLayout(layout);
     dock->setWidget(settingsPanel);
     addDockWidget(Qt::RightDockWidgetArea, dock);
     viewMenu->addAction(dock->toggleViewAction());
 
 
     connect(loadCountFile_btn, SIGNAL(clicked()), this, SLOT(loadCountFile()));
-
+    connect(loadDatabaseFile_btn, SIGNAL(clicked()), this, SLOT(loadDatabaseFile()));
+    connect(loadImageListFile_btn, SIGNAL(clicked()), this, SLOT(loadImageListFile()));
+    connect(gsc_edit, SIGNAL(textChanged(QString)), this, SLOT(setGSC(const QString &)));
 
 
     // Panel z tabela

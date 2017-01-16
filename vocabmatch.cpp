@@ -1,55 +1,37 @@
-/*
- * Copyright 2011-2012 Noah Snavely, Cornell University
- * (snavely@cs.cornell.edu).  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
-
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above
- *    copyright notice, this list of conditions and the following
- *    disclaimer in the documentation and/or other materials provided
- *    with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY NOAH SNAVELY ''AS IS'' AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL NOAH SNAVELY OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
- * BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
- * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
- * DAMAGE.
- *
- * The views and conclusions contained in the software and
- * documentation are those of the authors and should not be
- * interpreted as representing official policies, either expressed or
- * implied, of Cornell University.
- *
- */
-
-/* VocabMatch.cpp */
-/* Read a database stored as a vocab tree and score a set of query images */
-
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include <ctime>
-
+#include <fstream>
+#include <vector>
+#include <algorithm>
 #include <string>
-
+#include <sstream>
+#include <iostream>
+#include <typeinfo>
 #include "VocabTree.h"
 #include "keys2.h"
-
+#include <QList>
 #include "defines.h"
 #include "qsort.h"
+#include "match.h"
+
+
+
+
+/*
+ * Dopasowywanie obrazu
+ *
+ * inputs:
+ *  database_file     :sciezka do bazy
+ *  imageList_file    :sciezka do pliku z obrazami uczacymi
+ *
+ * */
+QList<Res> mathImage(const QString& key_file) {
+    QList<Res> r;
+    return r;
+}
 
 /* Read in a set of keys from a file
  *
@@ -86,6 +68,77 @@ unsigned char *ReadKeys(const char *keyfile, int dim, int &num_keys_out)
     return keys_char;
 }
 
+/* Read name of model  from a file
+ *
+ * Inputs:
+ *   modelCount      : number of classes
+ *   modelCountFile  : name file
+ *
+ *
+ * Return value   : intervals following classes
+ */
+Range QueryRangesTemp(int modelCount, Range count) {
+
+
+
+    Range ranges(modelCount);
+    for (unsigned int i = 1; i < count.count_query.size(); i++) {
+
+        int tmp_train = 0;
+        for (unsigned int j = 0; j < i; j++) {
+            tmp_train += count.count_train[j];
+        }
+        ranges.count_train[i - 1] = tmp_train;
+        ranges.name[i - 1] = count.name[i-1];
+        std::cout << "ranges "<<i<<" : "  << " train: " << ranges.count_train[i - 1] <<" model "<<ranges.name[i - 1]<< endl;
+    }
+
+
+    return ranges;
+
+}
+
+vector<Res> GroupResult(vector<Res> res) {
+    vector<Res> tmp;								//pomacniczy wektor przechowujacy pogrupowane wyniki
+    tmp.push_back(res[0]);							//dodnie pierwszego
+
+    for (unsigned int i = 1; i < res.size(); i++)			//przetwarzanie wszystkich pozycji (najlepszych)
+    {
+        bool isVal = false;							//pamietanie czy
+        int localIdx = -1;
+        for (unsigned int j = 0; j < tmp.size(); j++)
+            if (res[i].res == tmp[j].res)
+            {
+                isVal = true;
+                localIdx = j;
+            }
+
+        if (!isVal){
+            //std::cout<<"not val"<<res[i].val<<" "<<res[i].res<<std::endl;
+        tmp.push_back(res[i]);}
+        else
+        {
+            //std::cout<<"lokalidx: "<<localIdx<<" val: "<<res[i].val<<" res: "<<res[i].res<<std::endl;
+            tmp[localIdx].val += res[i].val;
+            //std::cout<<"sum: "<<tmp[localIdx].val<<std::endl;
+
+        }
+
+    }
+
+    sort(tmp.begin(), tmp.end(), [](Res d1, Res d2) { return d1.val > d2.val; });
+    return tmp;
+}
+
+int CheckClassQuery(vector<int> ranges, int idx, int classCount) { //klasyfikacja na podstawie przediałów
+    for (unsigned int i = 0; i < ranges.size(); i++)
+        if (idx < ranges[i])
+            return i+1;
+
+    if (idx > ranges[ranges.size() - 1]);
+    return classCount;
+}
+
 int BasifyFilename(const char *filename, char *base)
 {
     strcpy(base, filename);
@@ -94,4 +147,21 @@ int BasifyFilename(const char *filename, char *base)
     return 0;
 }
 
+void split(const std::string &s, char delim, vector<std::string> &e) {
+    stringstream ss;
+    ss.str(s);
+    string v;
+    while (getline(ss, v, delim)) {
+        e.push_back(v);
+    }
+}
 
+vector<std::string> split(const std::string &s, char delim) {
+    vector<std::string> e;
+    split(s, delim, e);
+    return e;
+}
+
+void show_args(std::initializer_list<std::string> args) {
+    for (auto a : args) printf("%s \n", a.c_str());
+}

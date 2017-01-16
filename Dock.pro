@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     imageworker.cpp
 
 HEADERS  += mainwindow.h \
-    imageworker.h
+    imageworker.h \
+    match.h
 
 FORMS    += mainwindow.ui
 
