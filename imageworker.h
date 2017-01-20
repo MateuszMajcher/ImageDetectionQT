@@ -8,6 +8,7 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QErrorMessage>
+#include <QApplication>
 class QListWidget;
 class QFileInfo;
 class ImageWorker : public QWidget {
@@ -26,7 +27,10 @@ public:
     QString getFileName(const QString& path);
     bool fileExists(QString path);
 
-
+    void setCountFile(QMap<QString, int> count_file);
+    void setDatabaseFile( QString file);
+    void setImageListFile( QString file);
+    void setGSC(int);
 
 private:
 
@@ -34,6 +38,11 @@ private:
     QString convert_process_pnm = "jpegtopnm ";
     QString extract_process = "./sift";
     QErrorMessage error;
+
+    QMap<QString, int> count_file;
+    QString database_file;
+    QString image_list_file;
+    int gsc;
 
 };
 #endif // IMAGEWORKER_H

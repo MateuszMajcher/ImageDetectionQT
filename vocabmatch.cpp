@@ -28,8 +28,29 @@
  *  imageList_file    :sciezka do pliku z obrazami uczacymi
  *
  * */
-QList<Res> mathImage(const QString& key_file) {
+QList<Res> mathImage(const QString& key_file, const QString& database_file, const QString& image_list_file, int gcs) {
     QList<Res> r;
+    qDebug()<<"Debug:: "<<key_file;
+    qDebug()<<"Debug:: "<<database_file;
+    qDebug()<<"Debug:: "<<image_list_file;
+    qDebug()<<"Debug:: "<<gcs;
+
+    DistanceType distance_type = DistanceMin;
+     bool normalize = true;
+
+
+
+     /* Wczytanie drzewa*/
+     printf("[VocabMatch] Reading database...\n");
+     fflush(stdout);
+
+     clock_t start = clock();
+     VocabTree tree;
+     tree.Read("a.db");
+
+
+
+
     return r;
 }
 

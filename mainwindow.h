@@ -31,8 +31,6 @@ private slots:
     void clear(); //Wyczyszczenie obrazow
     void runMatch(); //rozpoznawanie
     void about(); //o aplikacji
-    void insertCustomer(const QString& customer);
-    void addParagraph(const QString &paragraph);
     void setGSC(const QString &);
 
 

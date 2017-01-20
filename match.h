@@ -34,7 +34,7 @@ public:
     vector<int> count_query;
 };
 
-QList<Res> mathImage(const QString& key_file);
+QList<Res> mathImage(const QString& key_file, const QString& database_file, const QString& image_list_file, int gcs);
 unsigned char *ReadKeys(const char *, int , int &);
 vector<int> QueryRanges(int);
 void getDataStat(string);

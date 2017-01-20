@@ -98,6 +98,7 @@ void MainWindow::loadDatabaseFile() {
         path = database_file;
 
     database_file = QFileDialog::getOpenFileName(this, tr("Open database file"), path, "Database files (*.db)");
+    worker->setDatabaseFile(database_file);
     database_edit->setText(database_file);
 }
 
@@ -109,11 +110,13 @@ void MainWindow::loadImageListFile() {
         path = image_list_file;
 
     image_list_file = QFileDialog::getOpenFileName(this, tr("Open file with list image using to learn"), path, "Text file (*.txt)");
+    worker->setImageListFile(image_list_file);
     imageList_edit->setText(image_list_file);
 }
 
 void MainWindow::setGSC(const QString &number) {
     gsc = number.toInt();
+    worker->setGSC(gsc);
 }
 
 void MainWindow::clear() {
@@ -124,16 +127,6 @@ void MainWindow::runMatch() {
     showProgressBar();
     qApp->processEvents();
     worker->run();
-}
-
-void MainWindow::insertCustomer(const QString &customer)
-{
-
-}
-
-void MainWindow::addParagraph(const QString &paragraph)
-{
-
 }
 
 void MainWindow::showProgressBar() {

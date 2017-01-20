@@ -31,9 +31,12 @@ void ImageWorker::run() {
         QString FullFilePath  = data.toString();
         QString output_pgm( QString::number(i) + ".pgm");
         QString output_key( QString::number(i) + ".key");
-        if (!convertPGM(FullFilePath, output_pgm, msg)) {
-           if (convertKEY(output_pgm, output_key, msg))
-                mathImage(output_key);
+        if (convertPGM(FullFilePath, output_pgm, msg)) {
+           if (convertKEY(output_pgm, output_key, msg)) {
+               qApp->processEvents();
+                mathImage(output_key, database_file, image_list_file, gsc);
+                item->setText("match");
+           }
            else
                error.showMessage("Image " + FullFilePath + " convert error\n" + msg);
         } else {
@@ -65,6 +68,23 @@ void ImageWorker::runCommand(const QString &command, int timeoutMillisec, QStrin
     qDebug()<< stdout;
     qDebug()<< stderr;
     error = stderr;
+}
+
+
+void ImageWorker::setCountFile(QMap<QString, int> map) {
+    count_file = map;
+}
+
+void ImageWorker::setDatabaseFile( QString file) {
+    database_file = file;
+}
+
+void ImageWorker::setImageListFile( QString file) {
+    image_list_file  = file;
+}
+
+void ImageWorker::setGSC(int g) {
+    gsc = g;
 }
 
 QString ImageWorker::getFileName(const QString &path) {
