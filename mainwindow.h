@@ -6,6 +6,7 @@
 #include <QMap>
 #include "imageworker.h"
 
+
 class QAction;
 class QListWidget;
 class QTableWidget;
@@ -16,6 +17,8 @@ class QTextEdit;
 class QColor;
 class QProgressBar;
 class QLabel;
+class ImageWorker;
+class item;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -44,7 +47,7 @@ private:
 
     ImageWorker* worker;
 
-    QMap<QString, int> count_file;
+    QList<item> count_file;
     QString database_file;
     QString image_list_file;
     int gsc;
@@ -69,6 +72,8 @@ private:
 
     //menu
     QMenu *viewMenu;
+
+    QString t_path = "/home/mateusz/workspace/dr_cars/library";
 };
 
 #endif // MAINWINDOW_H

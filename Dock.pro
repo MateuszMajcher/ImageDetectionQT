@@ -36,8 +36,8 @@ win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../example/lib/release/ -l
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../example/lib/debug/ -lANN_char
 else:unix: LIBS += -L$$PWD/../example/lib/ -lANN_char
 
-INCLUDEPATH += $$PWD/../example/lib/ann_1.1_char/include/ANN
-DEPENDPATH += $$PWD/../example/lib/ann_1.1_char/include/ANN
+INCLUDEPATH += $$PWD/../example/lib/ann_1.1_char/include/
+DEPENDPATH += $$PWD/../example/lib/ann_1.1_char/include/
 
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../example/lib/release/libANN_char.a
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../example/lib/debug/libANN_char.a
@@ -64,8 +64,8 @@ win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../example/lib/release/ -l
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../example/lib/debug/ -limage
 else:unix: LIBS += -L$$PWD/../example/lib/ -limage
 
-INCLUDEPATH += $$PWD/../example/lib/zlib/include
-DEPENDPATH += $$PWD/../example/lib/zlib/include
+INCLUDEPATH += $$PWD/../example/lib/imagelib
+DEPENDPATH += $$PWD/../example/lib/imagelib
 
 win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../example/lib/release/libimage.a
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../example/lib/debug/libimage.a
@@ -73,14 +73,14 @@ else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/..
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../example/lib/debug/image.lib
 else:unix: PRE_TARGETDEPS += $$PWD/../example/lib/libimage.a
 
-INCLUDEPATH += $$PWD/../example/VocabLib
-DEPENDPATH += $$PWD/../example/VocabLib
+INCLUDEPATH += $$PWD/../example/lib/zlib/include
+DEPENDPATH += $$PWD/../example/lib/zlib/include
 
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../example/release/ -lvocab
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../example/debug/ -lvocab
-else:unix: LIBS += -L$$PWD/../example/ -lvocab -lANN -lANN_char -limage -lz -fopenmp
+else:unix: LIBS += -L$$PWD/../example/ -lvocab -lANN_char -lANN -limage -lz -O3 -fopenmp
 
 INCLUDEPATH += $$PWD/../example/VocabLib
 DEPENDPATH += $$PWD/../example/VocabLib
@@ -89,4 +89,4 @@ win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../example/rel
 else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../example/debug/libvocab.a
 else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../example/release/vocab.lib
 else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../example/debug/vocab.lib
-else:unix: PRE_TARGETDEPS += $$PWD/../example/libvocab.a
+else:unix: PRE_TARGETDEPS += $$PWD/../example/VocabLib/libvocab.a

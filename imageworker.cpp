@@ -34,7 +34,7 @@ void ImageWorker::run() {
         if (convertPGM(FullFilePath, output_pgm, msg)) {
            if (convertKEY(output_pgm, output_key, msg)) {
                qApp->processEvents();
-                mathImage(output_key, database_file, image_list_file, gsc);
+                mathImage(output_key, database_file, image_list_file, count_file, gsc);
                 item->setText("match");
            }
            else
@@ -71,7 +71,7 @@ void ImageWorker::runCommand(const QString &command, int timeoutMillisec, QStrin
 }
 
 
-void ImageWorker::setCountFile(QMap<QString, int> map) {
+void ImageWorker::setCountFile(QList<item> map) {
     count_file = map;
 }
 

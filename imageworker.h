@@ -9,8 +9,13 @@
 #include <QProcess>
 #include <QErrorMessage>
 #include <QApplication>
+#include "match.h"
+
 class QListWidget;
 class QFileInfo;
+class item;
+
+
 class ImageWorker : public QWidget {
     Q_OBJECT
 
@@ -27,7 +32,7 @@ public:
     QString getFileName(const QString& path);
     bool fileExists(QString path);
 
-    void setCountFile(QMap<QString, int> count_file);
+    void setCountFile(QList<item> count_file);
     void setDatabaseFile( QString file);
     void setImageListFile( QString file);
     void setGSC(int);
@@ -39,7 +44,7 @@ private:
     QString extract_process = "./sift";
     QErrorMessage error;
 
-    QMap<QString, int> count_file;
+    QList<item> count_file;
     QString database_file;
     QString image_list_file;
     int gsc;

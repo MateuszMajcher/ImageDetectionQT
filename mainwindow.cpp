@@ -25,7 +25,7 @@ MainWindow::MainWindow() {
 
 void MainWindow::newMatch() {
     clear();
-    QStringList fileName = QFileDialog::getOpenFileNames(this,tr("Open Image"), "C:/qt-win-opensource-src-4.5.0/bin/", tr("Image Files(*.png *.jpg *.bmp *.avi *.gif)"));
+    QStringList fileName = QFileDialog::getOpenFileNames(this,tr("Open Image"), "/home/mateusz/image", tr("Image Files(*.png *.jpg *.bmp *.avi *.gif)"));
 
     worker->getImage()->setViewMode(QListWidget::IconMode);
     worker->getImage()->setIconSize(QSize(200, 200));
@@ -40,7 +40,7 @@ void MainWindow::newMatch() {
 
 void MainWindow::loadCountFile()
 {
-    QString countFileName = QFileDialog::getOpenFileName(this, tr("Open count file"), "/home/mateusz/Dokumenty/c++/test", "Text files (*.txt)");
+    QString countFileName = QFileDialog::getOpenFileName(this, tr("Open count file"), t_path, "Text files (*.txt)");
     count_file.clear();
     QFile inputFile(countFileName);
     if (inputFile.open(QIODevice::ReadOnly)) {
@@ -49,13 +49,17 @@ void MainWindow::loadCountFile()
         while (!in.atEnd()) {
 
             QStringList tokens = in.readLine().split(":", QString::SkipEmptyParts);
-
+            qDebug()<<tokens;
             if (tokens.size() == 2) {
                 bool is_number = false;
                 int v = tokens.at(1).toInt(&is_number);
                 ;
                 if (is_number) {
-                    count_file.insert(tokens.at(0), v);
+                    item i;
+                    i.name = tokens.at(0);
+                    i.count = v;
+                    count_file.append(i);
+
                 }
                 else {
                     success = false;
@@ -68,17 +72,19 @@ void MainWindow::loadCountFile()
         inputFile.close();
 
         if (success) {
-
+            worker->setCountFile(count_file);
             countFile_edit->setText(countFileName);
             //ustawienie ilosci wierszy w tabeli
             countTable->setRowCount(count_file.size());
 
-            QMapIterator<QString, int> i(count_file);
+            QListIterator<item> i(count_file);
             int row = 0;
             while (i.hasNext()) {
-                i.next();
-                countTable->setItem(row, 0, new QTableWidgetItem(i.key()));
-                countTable->setItem(row, 1, new QTableWidgetItem(QString::number(i.value())));
+
+               item u =  i.next();
+
+                countTable->setItem(row, 0, new QTableWidgetItem(u.name));
+                countTable->setItem(row, 1, new QTableWidgetItem(QString::number(u.count)));
                 row++;
             }
         }
@@ -93,7 +99,7 @@ void MainWindow::loadCountFile()
 void MainWindow::loadDatabaseFile() {
     QString path;
     if (database_file.isEmpty())
-        path ="./";
+        path = t_path;
     else
         path = database_file;
 
@@ -105,7 +111,7 @@ void MainWindow::loadDatabaseFile() {
 void MainWindow::loadImageListFile() {
     QString path;
     if (image_list_file.isEmpty())
-        path = "./";
+        path = t_path;
     else
         path = image_list_file;
 
