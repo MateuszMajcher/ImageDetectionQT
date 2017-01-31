@@ -5,10 +5,18 @@
 #include "mainwindow.h"
 using namespace std;
 
+//klasa reprezentujaca rekord countFile
 class item {
 public:
     QString name;
     int count;
+};
+
+//klasa reprezentujaca wynik
+class result {
+public:
+    QString name;
+    double score;
 };
 
 class ImageMatch {
@@ -16,7 +24,6 @@ public:
     int i; //index obrazu train
     double v; //podobienstwo
 };
-
 
 //klasa opisuje dopasowanie
 class Res {
@@ -35,12 +42,12 @@ public:
         count_train.resize(size);
     }
 
-    vector<string> name;
+    vector<std::string> name;
     vector<int> count_train;
     vector<int> count_query;
 };
 
-QList<Res> mathImage(const QString& key_file, const QString& database_file, const QString& image_list_file, QList<item> count_file, int gcs);
+QList<result> mathImage(const QString& key_file, const QString& database_file, const QString& image_list_file, QList<item> count_file, int gcs);
 unsigned char *ReadKeys(const char *, int , int &);
 vector<int> QueryRanges(int);
 void getDataStat(string);

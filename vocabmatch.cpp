@@ -18,8 +18,6 @@
 #include "match.h"
 
 
-
-
 /*
  * Dopasowywanie obrazu
  *
@@ -28,7 +26,7 @@
  *  imageList_file    :sciezka do pliku z obrazami uczacymi
  *
  * */
-QList<Res> mathImage(const QString& key_file, const QString& database_file, const QString& image_list_file, QList<item> count_file, int gcs) {
+QList<result> mathImage(const QString& key_file, const QString& database_file, const QString& image_list_file, QList<item> count_file, int gcs) {
     QList<Res> r;
     qDebug()<<"Debug:: "<<key_file;
     qDebug()<<"Debug:: "<<database_file;
@@ -69,7 +67,7 @@ QList<Res> mathImage(const QString& key_file, const QString& database_file, cons
                QTextStream in(&file);
                   QString line = in.readLine();
                   while (!line.isNull()) {
-                      //qDebug()<<line;
+                      qDebug()<<line;
                       db_files.push_back(line.toStdString());
                       line = in.readLine();
                   }
@@ -90,77 +88,84 @@ QList<Res> mathImage(const QString& key_file, const QString& database_file, cons
            }
             qDebug()<<count.count_query.size();
            /* Parse count File*/
-                         Range ranges = QueryRangesTemp(count_file.size(), count);
-                         int num_db_images = db_files.size();
+            Range ranges = QueryRangesTemp(count_file.size(), count);
+            int num_db_images = db_files.size();
 
 
-                         printf("[VocabMatch] Read %d database images\n", num_db_images);
-                         /* Now score each query keyfile */
-                        // printf("[VocabMatch] Scoring %d query images...\n", num_query_images);
+            printf("[VocabMatch] Read %d database images\n", num_db_images);
+            /* Now score each query keyfile */
+            // printf("[VocabMatch] Scoring %d query images...\n", num_query_images);
 
-                         float *scores = new float[num_db_images];
-                         double *scores_d = new double[num_db_images];
-                         int *perm = new int[num_db_images];
-
-
-
-                           // for (int i = 0; i < num_query_images; i++) {
-                                start = clock();
-
-                                /* Clear scores */
-                                for (int j = 0; j < num_db_images; j++)
-                                    scores[j] = 0.0;
-
-                                unsigned char *keys;
-                                int num_keys;
-                                 //wczytanie pliku key
-                                keys = ReadKeys("aa.key", dim, num_keys);
-                                  //punktowanie
-                                clock_t start_score = clock();
-                                double mag = tree.ScoreQueryKeys(num_keys, normalize, keys, scores);
-                                clock_t end_score = end = clock();
-
-                                printf("[VocabMatch] Scored image %s in %0.3fs "
-                                       "( %0.3fs total, mag = %0.3f )\n",
-                                       key_file.toStdString().c_str(),
-                                       (double) (end_score - start_score) / CLOCKS_PER_SEC,
-                                       (double) (end - start) / CLOCKS_PER_SEC, mag);
-
-                                //zapis wynikow do tablicy
-                                for (int j = 0; j < num_db_images; j++) {
-                                    scores_d[j] = (double) scores[j];
-                                }
-
-                                qsort_descending();
-                                qsort_perm(num_db_images, scores_d, perm);
-
-                                for (int j = 0; j < num_db_images; j++) {
-                                    qDebug()<<scores_d[j] << " "<<perm[j];
-                                }
-
-                                int top = MIN(num_nbrs, num_db_images);
-
-                                /* jesli brak statystyki*/
-                                if (gcs == 0) {
-                                    gcs = top;
-                                }
-
-                                /* analiza ze statystyka */
-                                match.resize(gcs);
-                                //double sum[25] = {0.0};
-                                for (int j = 0; j < gcs; j++) {
-                                    match[j].res = CheckClassQuery(ranges.count_train, perm[j], count_file.size());
-                                    match[j].val = scores_d[j];
-                                    qDebug()<<"-"<<match[j].res<<" = "<<perm[j]<<" "<<match[j].val<<" > ";
-                                }
+            float *scores = new float[num_db_images];
+            double *scores_d = new double[num_db_images];
+            int *perm = new int[num_db_images];
 
 
 
-qDebug()<<"done";
+            // for (int i = 0; i < num_query_images; i++) {
+            start = clock();
+
+            /* Clear scores */
+            for (int j = 0; j < num_db_images; j++)
+                scores[j] = 0.0;
+
+            unsigned char *keys;
+            int num_keys;
+            //wczytanie pliku key
+            keys = ReadKeys(key_file.toStdString().c_str(), dim, num_keys);
+            //punktowanie
+            clock_t start_score = clock();
+            double mag = tree.ScoreQueryKeys(num_keys, normalize, keys, scores);
+            clock_t end_score = end = clock();
+
+            printf("[VocabMatch] Scored image %s in %0.3fs "
+                   "( %0.3fs total, mag = %0.3f )\n",
+                   key_file.toStdString().c_str(),
+                   (double) (end_score - start_score) / CLOCKS_PER_SEC,
+                   (double) (end - start) / CLOCKS_PER_SEC, mag);
+
+            //zapis wynikow do tablicy
+            for (int j = 0; j < num_db_images; j++) {
+                scores_d[j] = (double) scores[j];
+            }
+
+            qsort_descending();
+            qsort_perm(num_db_images, scores_d, perm);
+
+            for (int j = 0; j < num_db_images; j++) {
+               // qDebug()<<scores_d[j] << " "<<perm[j];
+            }
+
+            int top = MIN(num_nbrs, num_db_images);
+
+            /* jesli brak statystyki*/
+            if (gcs == 0) {
+                gcs = top;
+            }
+
+            /* analiza ze statystyka */
+            match.resize(gcs);
+            //double sum[25] = {0.0};
+            for (int j = 0; j < gcs; j++) {
+                match[j].res = CheckClassQuery(ranges.count_train, perm[j], count_file.size());
+                match[j].val = scores_d[j];
+                qDebug()<<"-"<<match[j].res<<" = "<<perm[j]<<" "<<match[j].val<<" > "<< QString::fromStdString(count.name.at(match[j].res-1));
+
+            }
+
+            vector<Res> tmp = GroupResult(match);
+            QList<result> res;
 
 
+            for (auto const& value: tmp) {
+               // qDebug()<<"result: "<<QString::fromStdString(count.name[value.res-1])<<" "<<value.val;
+               result tmp;
+               tmp.name = QString::fromStdString(count.name[value.res-1]);
+               tmp.score = value.val;
+               res.append(tmp);
+           }
 
-    return r;
+    return res;
 }
 
 /* Read in a set of keys from a file

@@ -19,6 +19,7 @@ class QProgressBar;
 class QLabel;
 class ImageWorker;
 class item;
+class result;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -35,6 +36,9 @@ private slots:
     void runMatch(); //rozpoznawanie
     void about(); //o aplikacji
     void setGSC(const QString &);
+    void checkCorrect(); //czy wszyskie pola uzupelnione
+    void imageTask(); //progressBar dla przetwarzania
+
 
 
 private:
@@ -42,6 +46,7 @@ private:
     void createStatusBar();
     void createDockWindows();
     void showProgressBar();
+    void hideProgressBar();
 
     QErrorMessage msg;
 
@@ -69,9 +74,12 @@ private:
     //Progress bar panel
     QDockWidget *dockProgressBar;
     QProgressBar *progressBar;
+    int steps; //ilosc zdiec pozostalych do klasyfikacji
+    QPalette pal;
 
     //menu
     QMenu *viewMenu;
+    QAction *runAct;
 
     QString t_path = "/home/mateusz/workspace/dr_cars/library";
 };

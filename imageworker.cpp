@@ -1,19 +1,20 @@
 #include "imageworker.h"
-#include "match.h"
+
 
 ImageWorker::ImageWorker(QWidget *parent)
 {
     listImages = new QListWidget(parent);
+
 }
 
 void ImageWorker::add(QString image) {
     QListWidgetItem *newItem = new QListWidgetItem(QIcon(image), "czxc");
-
+    //ustawienie oryginalnej sciezki do obrazu
     QString fullFilePath(image);
     QVariant fullFilePathData(fullFilePath);
     newItem->setData(Qt::UserRole, fullFilePathData);
     newItem->setText("Not Classsifed");
-
+    //dodanie obrazu do galerii
     listImages->addItem( newItem);
 }
 
@@ -21,21 +22,31 @@ QListWidget* ImageWorker::getImage() {
     return listImages;
 }
 
-
 void ImageWorker::run() {
     for(int i = 0; i < listImages->count(); ++i)
     {
         QString msg;
-        QListWidgetItem* item = listImages->item(i);
-        QVariant data = item->data(Qt::UserRole);
+        QListWidgetItem* it = listImages->item(i);
+        QVariant data = it->data(Qt::UserRole);
         QString FullFilePath  = data.toString();
+
+        //ustawienie sciezek wyjsciowych dla pgm oraz key
         QString output_pgm( QString::number(i) + ".pgm");
         QString output_key( QString::number(i) + ".key");
+
+        //przetwarzanie
         if (convertPGM(FullFilePath, output_pgm, msg)) {
            if (convertKEY(output_pgm, output_key, msg)) {
                qApp->processEvents();
-                mathImage(output_key, database_file, image_list_file, count_file, gsc);
-                item->setText("match");
+                  QList<result> result;
+                   result = mathImage(output_key, database_file, image_list_file, count_file, gsc);
+                   it->setText(result.at(0).name + " : " + QString::number(percentCalculate(result)) + "%");
+                   for (auto const& v: result)
+                      qDebug()<<"result: "<<v.name<<" "<<v.score;
+                   emit progress();
+                   deleteFile(output_key);
+                   deleteFile(output_pgm);
+
            }
            else
                error.showMessage("Image " + FullFilePath + " convert error\n" + msg);
@@ -45,6 +56,20 @@ void ImageWorker::run() {
     }
 }
 
+double ImageWorker::percentCalculate(QList<result> res) {
+       double sum = 0.0;
+       foreach (result s, res) {
+           sum += s.score;
+       }
+       qDebug()<<sum;
+       double per = res.at(0).score * 100 / sum;
+       return per;
+}
+
+void ImageWorker::deleteFile(QString path) {
+    QFile file (path);
+    file.remove();
+}
 
 bool ImageWorker::convertPGM(const QString &image, const QString &output_pgm, QString &error) {
     QString command = convert_process_pnm + image + " | ppmtopgm >" + output_pgm;
@@ -69,7 +94,6 @@ void ImageWorker::runCommand(const QString &command, int timeoutMillisec, QStrin
     qDebug()<< stderr;
     error = stderr;
 }
-
 
 void ImageWorker::setCountFile(QList<item> map) {
     count_file = map;

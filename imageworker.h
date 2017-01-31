@@ -2,7 +2,7 @@
 #define IMAGEWORKER_H
 #include <QWidget>
 #include <QMutex>
-#include <QListWidget>>
+#include <QListWidget>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -14,6 +14,7 @@
 class QListWidget;
 class QFileInfo;
 class item;
+class result;
 
 
 class ImageWorker : public QWidget {
@@ -31,11 +32,16 @@ public:
     void runCommand(const QString& command, int timeoutMillisec, QString &error);
     QString getFileName(const QString& path);
     bool fileExists(QString path);
+    double percentCalculate(QList<result> res);
+    void deleteFile(QString path);
 
     void setCountFile(QList<item> count_file);
     void setDatabaseFile( QString file);
     void setImageListFile( QString file);
     void setGSC(int);
+
+signals:
+    void progress();
 
 private:
 

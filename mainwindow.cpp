@@ -10,7 +10,7 @@ MainWindow::MainWindow() {
 
    // listImages = new QListWidget(this);
     setCentralWidget(worker->getImage());
-
+    pal = palette();
     createActions();
     createStatusBar();
     createDockWindows();
@@ -95,7 +95,6 @@ void MainWindow::loadCountFile()
     }
 }
 
-
 void MainWindow::loadDatabaseFile() {
     QString path;
     if (database_file.isEmpty())
@@ -129,25 +128,69 @@ void MainWindow::clear() {
     worker->getImage()->clear();
 }
 
+//start przetwarzania
 void MainWindow::runMatch() {
     showProgressBar();
+    steps = 0;
+    progressBar->setMinimum(0);
+    progressBar->setMaximum(worker->getImage()->count());
+
     qApp->processEvents();
     worker->run();
+    hideProgressBar();
+}
+
+//ustawienie wartosci dla progressBar
+void MainWindow::imageTask() {
+    steps++;
+ progressBar->setValue(steps);
+
+
+ if (steps > progressBar->maximum()) {
+       steps = 0;
+ }
+
 }
 
 void MainWindow::showProgressBar() {
       dockProgressBar->show();
 }
 
-void MainWindow::about()
-{
-   QMessageBox::about(this, tr("About Dock Widgets"),
-            tr("The <b>Dock Widgets</b> example demonstrates how to "
-               "use Qt's dock widgets. You can enter your own text, "
-               "click a customer to add a customer name and "
-               "address, and click standard paragraphs to add them."));
+void MainWindow::hideProgressBar() {
+      dockProgressBar->hide();
 }
 
+//zmiana tla panelu ustawien jesli wszystkie dane zoztaly uzupelnione
+void MainWindow::checkCorrect() {
+    if (!countFile_edit->text().isEmpty() &&
+            !database_edit->text().isEmpty() &&
+              !imageList_edit->text().isEmpty() &&
+                  !gsc_edit->text().isEmpty()) {
+                        pal.setColor(QPalette::Background, QColor(0, 255, 0, 127));
+                        runAct->setEnabled(true);
+
+    } else {
+        pal.setColor(QPalette::Background, QColor(255, 0, 0, 127));
+
+
+    }
+
+    settingsPanel->setAutoFillBackground(true);
+    settingsPanel->setPalette(pal);
+}
+
+void MainWindow::about()
+{
+   QMessageBox::about(this, tr("Klasyfikacja modeli samochodów"),
+                      tr("Analiza i wizualizacja danych\n"
+                         "Wykonali\n"
+                         "\n"
+                         "Mateusz Majcher\n"
+                         "Ariel Trybek"));
+
+}
+
+//gorny panle akcje
 void MainWindow::createActions() {
     QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
     QToolBar *fileToolBar = addToolBar(tr("File"));
@@ -168,16 +211,17 @@ void MainWindow::createActions() {
     fileToolBar->addAction(clearAct);
 
 
-    QAction *runAct = new QAction(QIcon(":/images/run.png"), tr("&Run"), this);
+    runAct = new QAction(QIcon(":/images/run.png"), tr("&Run"), this);
     runAct->setStatusTip(tr("Run match"));
     connect(runAct, &QAction::triggered, this, &MainWindow::runMatch);
     fileMenu->addAction(runAct);
     fileToolBar->addAction(runAct);
+    runAct->setEnabled(false);
 
     viewMenu = menuBar()->addMenu(tr("View"));
     menuBar()->addSeparator();
 
-    QMenu *helpMenu = menuBar()->addMenu(tr("Pomoc"));
+    QMenu *helpMenu = menuBar()->addMenu(tr("Help"));
     helpMenu->addAction(tr("O Aplikacji"), this, &MainWindow::about);
     helpMenu->addAction(tr("Wersja Qt"), this, &QApplication::aboutQt);
 
@@ -187,12 +231,12 @@ void MainWindow::createStatusBar() {
     statusBar()->showMessage(tr("Ready"));
 }
 
+//utworzenie bocznych doków
 void MainWindow::createDockWindows() {
 
     //Panel sterowania
     QDockWidget *dock = new QDockWidget(tr("Settings panel"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    QPalette pal = palette();
     pal.setColor(QPalette::Background, QColor(255, 0, 0, 127));
     settingsPanel = new QWidget(dock);
     settingsPanel->setAutoFillBackground(true);
@@ -223,12 +267,17 @@ void MainWindow::createDockWindows() {
     addDockWidget(Qt::RightDockWidgetArea, dock);
     viewMenu->addAction(dock->toggleViewAction());
 
-
+    //syganały
     connect(loadCountFile_btn, SIGNAL(clicked()), this, SLOT(loadCountFile()));
     connect(loadDatabaseFile_btn, SIGNAL(clicked()), this, SLOT(loadDatabaseFile()));
     connect(loadImageListFile_btn, SIGNAL(clicked()), this, SLOT(loadImageListFile()));
     connect(gsc_edit, SIGNAL(textChanged(QString)), this, SLOT(setGSC(const QString &)));
 
+    //checkCorrect
+    connect(countFile_edit, SIGNAL(textChanged(QString)), this, SLOT(checkCorrect()));
+    connect(database_edit, SIGNAL(textChanged(QString)), this, SLOT(checkCorrect()));
+    connect(imageList_edit, SIGNAL(textChanged(QString)), this, SLOT(checkCorrect()));
+    connect(gsc_edit, SIGNAL(textChanged(QString)), this, SLOT(checkCorrect()));
 
     // Panel z tabela
     dock = new QDockWidget(tr("Count file"), this);
@@ -250,6 +299,9 @@ void MainWindow::createDockWindows() {
     progressBar = new QProgressBar();
     dockProgressBar->setWidget(progressBar);
     dockProgressBar->hide();
+    connect(worker, SIGNAL(progress()),
+        this, SLOT(imageTask()));
+
     addDockWidget(Qt::BottomDockWidgetArea, dockProgressBar);
     viewMenu->addAction(dockProgressBar->toggleViewAction());
 }
